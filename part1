@@ -1,26 +1,25 @@
 <?php
-// Task 1: Data Retrieval
-$URL = "https://data.gov.bh/api/explore/v2.1/catalog/datasets/01-statistics-of-students-nationalities_updated/records?where=colleges%20like%20%22IT%22%20AND%20the_programs%20like%20%22bachelor%22&limit=100";
+// Set the URL for the API endpoint
+$url = "https://data.gov.bh/api/explore/v2.1/catalog/datasets/01-statistics-of-students-nationalities_updated/records?where=colleges%20like%20%22IT%22%20AND%20the_programs%20like%20%22bachelor%22&limit=100";
 
-// Initialize cURL
-$ch = curl_init($URL);
-curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-$response = curl_exec($ch);
-curl_close($ch);
+// Fetch the data from the API
+$response = file_get_contents($url);
 
-// Check if response is valid
+// Check if the response is false
 if ($response === false) {
-    die('Error fetching data from API.');
+    die("Error fetching data from the API.");
 }
 
-// Decode the JSON response into a PHP associative array
-$result = json_decode($response, true);
+// Decode the JSON response into an associative array
+$data = json_decode($response, true);
 
-// Check if decoding was successful
+// Check for JSON decoding errors
 if (json_last_error() !== JSON_ERROR_NONE) {
-    die('Error decoding JSON data: ' . json_last_error_msg());
+    die("Error parsing JSON: " . json_last_error_msg());
 }
 
+// Access the results from the data
+$records = isset($data['results']) ? $data['results'] : [];
 ?>
 
 <!DOCTYPE html>
@@ -42,7 +41,7 @@ if (json_last_error() !== JSON_ERROR_NONE) {
             border: 1px solid #ddd;
         }
         th {
-            background-color: #f4f4f4;
+            background-color: grey;
         }
         @media (max-width: 600px) {
             th, td {
@@ -69,10 +68,11 @@ if (json_last_error() !== JSON_ERROR_NONE) {
                     </tr>
                 </thead>
                 <tbody>
-                    <?php
-                    // Task 2: Data Visualization
-                    if ($result && isset($result['results']) && count($result['results']) > 0) {
-                        foreach ($result['results'] as $record) {
+                    
+                <?php
+                    // Display the records
+                    if (!empty($records)) {
+                        foreach ($records as $record) {
                             $year = isset($record['year']) ? $record['year'] : 'N/A';
                             $semester = isset($record['semester']) ? $record['semester'] : 'N/A';
                             $nationality = isset($record['nationality']) ? $record['nationality'] : 'N/A';
@@ -98,5 +98,4 @@ if (json_last_error() !== JSON_ERROR_NONE) {
         </div>
     </main>
 </body>
-
 </html>
